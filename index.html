@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Will You Be My Valentine?</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial Rounded MT Bold', 'Arial', sans-serif;
+            background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .container {
+            text-align: center;
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            max-width: 500px;
+            position: relative;
+        }
+
+        h1 {
+            color: #ff4081;
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .buttons {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            margin-top: 30px;
+            position: relative;
+        }
+
+        #yesBtn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.5em;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.3s, background-color 0.3s;
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+        }
+
+        #yesBtn:hover {
+            transform: scale(1.1);
+            background-color: #45a049;
+        }
+
+        #noBtn {
+            background-color: #ff5252;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.5em;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.1s;
+            box-shadow: 0 5px 15px rgba(255, 82, 82, 0.4);
+        }
+
+        .hearts {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+        }
+
+        .heart {
+            position: absolute;
+            font-size: 20px;
+            opacity: 0;
+            animation: float 3s linear infinite;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        #successMessage {
+            animation: popIn 0.5s;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes wiggle {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-5deg); }
+            75% { transform: rotate(5deg); }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .bear-img {
+            animation: bounce 2s ease-in-out infinite, wiggle 3s ease-in-out infinite;
+        }
+
+        h1 {
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .container p {
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .buttons {
+            animation: fadeInUp 1.2s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="assets/bubu-dudu.gif" alt="Cute bear" class="bear-img" style="max-width: 200px; border-radius: 10px; margin-bottom: 20px;">
+        <h1>💖 Babuuuu... Will You Be My Valentine? 💖</h1>
+        <p>My dearest baby babu, you make every day feel special. 💕</p>
+        
+        <div class="buttons">
+            <button id="yesBtn">YES! 💝</button>
+            <button id="noBtn">No</button>
+        </div>
+        
+        <div id="successMessage" class="hidden">
+            <h2 style="color: #ff4081;">🎉 YAY! You've made me the happiest! 🎉</h2>
+            <p>I can't wait to celebrate with you! 💕</p>
+            <img src="assets/kiss.gif" alt="Happy dance" style="max-width: 200px; border-radius: 10px;">
+        </div>
+    </div>
+
+    <div class="hearts" id="heartsContainer"></div>
+
+    <script>
+        const noBtn = document.getElementById('noBtn');
+        const yesBtn = document.getElementById('yesBtn');
+        const successMessage = document.getElementById('successMessage');
+        const heartsContainer = document.getElementById('heartsContainer');
+        const container = document.querySelector('.container');
+        
+        let clickCount = 0;
+        const funnyMessages = [
+            "Are you sure? 😢",
+            "Maybe think about it? 💭",
+            "Pretty please? 🥺",
+            "You're breaking my heart 💔",
+            "I'll keep asking! 😅",
+            "Just click yes already! 😘"
+        ];
+
+        // Make "No" button run away
+        document.addEventListener('mousemove', (e) => {
+            const noBtnRect = noBtn.getBoundingClientRect();
+            const mouseX = e.clientX;
+            const mouseY = e.clientY;
+            
+            const btnCenterX = noBtnRect.left + noBtnRect.width / 2;
+            const btnCenterY = noBtnRect.top + noBtnRect.height / 2;
+            
+            const distance = Math.sqrt(
+                Math.pow(mouseX - btnCenterX, 2) + 
+                Math.pow(mouseY - btnCenterY, 2)
+            );
+            
+            // If mouse is within 150px of the button
+            if (distance < 150) {
+                const minDistance = 192; // 2 inches at 96 DPI (2 * 96 pixels)
+                const currentX = btnCenterX;
+                const currentY = btnCenterY;
+                
+                let newX, newY, distanceFromOriginal;
+                
+                // Keep trying until we find a position at least 2 inches away
+                do {
+                    newX = Math.random() * (window.innerWidth - noBtnRect.width);
+                    newY = Math.random() * (window.innerHeight - noBtnRect.height);
+                    
+                    const newCenterX = newX + noBtnRect.width / 2;
+                    const newCenterY = newY + noBtnRect.height / 2;
+                    
+                    distanceFromOriginal = Math.sqrt(
+                        Math.pow(newCenterX - currentX, 2) + 
+                        Math.pow(newCenterY - currentY, 2)
+                    );
+                } while (distanceFromOriginal < minDistance);
+                
+                // Set position to fixed for teleportation
+                noBtn.style.position = 'fixed';
+                noBtn.style.left = `${Math.max(0, newX)}px`;
+                noBtn.style.top = `${Math.max(0, newY)}px`;
+                
+                // Change button text randomly
+                if (Math.random() > 0.7) {
+                    noBtn.textContent = funnyMessages[Math.floor(Math.random() * funnyMessages.length)];
+                }
+            }
+        });
+
+        // Yes button click
+        yesBtn.addEventListener('click', () => {
+            // Create hearts explosion
+            for (let i = 0; i < 50; i++) {
+                createHeart();
+            }
+            
+            // Show success message
+            document.querySelector('.buttons').classList.add('hidden');
+            successMessage.classList.remove('hidden');
+            
+            // Play celebration sound (optional)
+            const audio = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-happy-crowd-laugh-464.mp3');
+            audio.play().catch(e => console.log("Audio play failed:", e));
+        });
+
+        // No button click (if somehow caught)
+        noBtn.addEventListener('click', () => {
+            clickCount++;
+            if (clickCount < funnyMessages.length) {
+                noBtn.textContent = funnyMessages[clickCount];
+            } else {
+                noBtn.textContent = "Okay fine, you win! 😊";
+                // After many tries, make button stay put and change to yes
+                setTimeout(() => {
+                    noBtn.textContent = "Okay YES! 💖";
+                    noBtn.style.backgroundColor = "#4CAF50";
+                    noBtn.onclick = () => yesBtn.click();
+                }, 1000);
+            }
+            
+            // Make button even faster
+            noBtn.style.transition = "all 0.05s";
+        });
+
+        // Create floating hearts
+        function createHeart() {
+            const heart = document.createElement('div');
+            heart.classList.add('heart');
+            heart.innerHTML = '💖';
+            heart.style.left = Math.random() * 100 + 'vw';
+            heart.style.animationDuration = (Math.random() * 2 + 2) + 's';
+            heart.style.fontSize = (Math.random() * 20 + 20) + 'px';
+            heartsContainer.appendChild(heart);
+            
+            // Remove heart after animation
+            setTimeout(() => {
+                heart.remove();
+            }, 3000);
+        }
+
+        // Create some initial hearts
+        for (let i = 0; i < 10; i++) {
+            setTimeout(() => createHeart(), i * 300);
+        }
+    </script>
+</body>
+</html>
