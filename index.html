@@ -7,17 +7,19 @@
     <style>
         body {
             margin: 0;
-            padding: 0;
+            padding: 20px 0;
             font-family: 'Arial Rounded MT Bold', 'Arial', sans-serif;
             background: linear-gradient(135deg, #ff9a9e, #fad0c4);
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            overflow: hidden;
+            overflow-x: hidden;
         }
 
         .container {
+            margin-top: 5%;
+            margin-bottom: 5%;
             text-align: center;
             background-color: rgba(255, 255, 255, 0.9);
             padding: 40px;
@@ -91,10 +93,16 @@
         @keyframes float {
             0% {
                 transform: translateY(0) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
                 opacity: 1;
             }
             100% {
-                transform: translateY(-100px) rotate(360deg);
+                transform: translateY(-150vh) rotate(360deg);
                 opacity: 0;
             }
         }
@@ -154,12 +162,60 @@
         .buttons {
             animation: fadeInUp 1.2s ease-out;
         }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 30px 20px;
+                max-width: 90%;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            h2 {
+                font-size: 1.5em;
+            }
+
+            #yesBtn, #noBtn {
+                padding: 12px 30px;
+                font-size: 1.2em;
+            }
+
+            .bear-img, #successMessage img {
+                max-width: 150px !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px 15px;
+            }
+
+            h1 {
+                font-size: 1.5em;
+            }
+
+            h2 {
+                font-size: 1.2em;
+            }
+
+            #yesBtn, #noBtn {
+                padding: 10px 25px;
+                font-size: 1em;
+            }
+
+            .bear-img, #successMessage img {
+                max-width: 120px !important;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <img src="assets/bubu-dudu.gif" alt="Cute bear" class="bear-img" style="max-width: 200px; border-radius: 10px; margin-bottom: 20px;">
-        <h1>💖 Babuuuu... Will You Be My Valentine? 💖</h1>
+        <img id="mainGif" src="assets/bubu-dudu.gif" alt="Cute bear" class="bear-img" style="max-width: 200px; border-radius: 10px; margin-bottom: 20px;">
+        <h1 id="mainHeading">💖 Babuuuu... Will You Be My Valentine? 💖</h1>
         <p>My dearest baby babu, you make every day feel special. 💕</p>
         
         <div class="buttons">
@@ -169,8 +225,8 @@
         
         <div id="successMessage" class="hidden">
             <h2 style="color: #ff4081;">🎉 YAY! You've made me the happiest! 🎉</h2>
-            <p>I can't wait to celebrate with you! 💕</p>
-            <img src="assets/kiss.gif" alt="Happy dance" style="max-width: 200px; border-radius: 10px;">
+            <p>I love you so muchhh! 💕</p>
+            <img src="assets/kiss.gif" alt="Happy dance" style="max-width: 200px; border-radius: 10px; margin: 0 auto; display: block;">
         </div>
     </div>
 
@@ -184,6 +240,9 @@
         const container = document.querySelector('.container');
         
         let clickCount = 0;
+        let yesButtonScale = 1;
+        const isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+        
         const funnyMessages = [
             "Are you sure? 😢",
             "Maybe think about it? 💭",
@@ -248,6 +307,14 @@
                 createHeart();
             }
             
+            // Change the main gif and heading
+            const mainGif = document.getElementById('mainGif');
+            const mainHeading = document.getElementById('mainHeading');
+            
+            mainGif.src = 'assets/cuddle-cute.gif';
+            mainHeading.textContent = 'Yeeey!! I can\'t wait to celebrate our 2nd valentines together!';
+            mainHeading.style.color = '#ff4081';
+            
             // Show success message
             document.querySelector('.buttons').classList.add('hidden');
             successMessage.classList.remove('hidden');
@@ -260,6 +327,21 @@
         // No button click (if somehow caught)
         noBtn.addEventListener('click', () => {
             clickCount++;
+            
+            // Mobile behavior: grow yes button
+            if (isMobile) {
+                yesButtonScale += 0.5;
+                yesBtn.style.transform = `scale(${yesButtonScale})`;
+                yesBtn.style.zIndex = '1000';
+                yesBtn.style.transition = 'transform 0.3s ease-out';
+                
+                // If button gets too big, just trigger yes
+                if (yesButtonScale >= 10) {
+                    yesBtn.click();
+                    return;
+                }
+            }
+            
             if (clickCount < funnyMessages.length) {
                 noBtn.textContent = funnyMessages[clickCount];
             } else {
@@ -272,30 +354,31 @@
                 }, 1000);
             }
             
-            // Make button even faster
-            noBtn.style.transition = "all 0.05s";
+            // Make button even faster on desktop
+            if (!isMobile) {
+                noBtn.style.transition = "all 0.05s";
+            }
         });
 
         // Create floating hearts
         function createHeart() {
             const heart = document.createElement('div');
             heart.classList.add('heart');
-            heart.innerHTML = '💖';
+            heart.innerHTML = '💜';
             heart.style.left = Math.random() * 100 + 'vw';
-            heart.style.animationDuration = (Math.random() * 2 + 2) + 's';
-            heart.style.fontSize = (Math.random() * 20 + 20) + 'px';
+            heart.style.bottom = '0';
+            heart.style.animationDuration = (Math.random() * 4 + 4) + 's';
+            heart.style.fontSize = (Math.random() * 30 + 20) + 'px';
             heartsContainer.appendChild(heart);
             
             // Remove heart after animation
             setTimeout(() => {
                 heart.remove();
-            }, 3000);
+            }, 8000);
         }
 
-        // Create some initial hearts
-        for (let i = 0; i < 10; i++) {
-            setTimeout(() => createHeart(), i * 300);
-        }
+        // Create hearts continuously
+        setInterval(() => createHeart(), 500);
     </script>
 </body>
 </html>
